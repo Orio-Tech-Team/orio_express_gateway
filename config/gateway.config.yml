@@ -4,9 +4,13 @@ apiEndpoints:
   login:
     paths: '/auth/login'
     methods: ['POST']
+  consumer-application-paths:
+    paths: '/*'
 serviceEndpoints:
   user-mangement:
     url: 'http://localhost:3001'
+  consumer-application:
+    url: 'http://localhost:3002'
   
 policies:
   - basic-auth
@@ -26,3 +30,17 @@ pipelines:
       - proxy:
           - action:
               serviceEndpoint: user-mangement
+  consumer-application-endpoints:
+    apiEndpoints:
+      - consumer-application-paths
+    policies:
+      - jwt:
+        - action:
+            secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+            checkCredentialExistence: false
+      - proxy:
+          - action:
+              serviceEndpoint: consumer-application
+      - rate-limit:
+          action:
+            max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
