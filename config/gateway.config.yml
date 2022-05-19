@@ -1,5 +1,5 @@
 http:
-  port: 3000
+  port: 4000
 apiEndpoints:
   login:
     paths: '/auth/login'
@@ -8,9 +8,9 @@ apiEndpoints:
     paths: '/*'
 serviceEndpoints:
   user-mangement:
-    url: 'http://localhost:3001'
+    url: 'http://localhost:4001'
   consumer-application:
-    url: 'http://localhost:3002'
+    url: 'http://localhost:4002'
   
 policies:
   - basic-auth
