@@ -5,7 +5,7 @@ apiEndpoints:
     paths: '/auth/login'
     methods: ['POST']
   consumer-application-paths:
-    paths: '/*'
+    paths: '/consumer-app/*'
 serviceEndpoints:
   user-mangement:
     url: 'http://localhost:5001'
