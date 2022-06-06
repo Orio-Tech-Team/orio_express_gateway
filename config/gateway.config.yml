@@ -4,6 +4,15 @@ apiEndpoints:
   login:
     paths: '/auth/login'
     methods: ['POST']
+  modules:
+    paths: '/modules/user'
+    methods: ['GET']
+  sliders:
+    paths: '/sliders'
+    methods: ['GET']
+  images:
+    paths: '/public/*/:fileName'
+    methods: ['GET']
   consumer-application-paths:
     paths: '/consumer-app/*'
 serviceEndpoints:
@@ -26,6 +35,7 @@ pipelines:
   user-management-endpoints:
     apiEndpoints:
       - login
+      - images
     policies:
       - proxy:
           - action:
@@ -41,6 +51,21 @@ pipelines:
       - proxy:
           - action:
               serviceEndpoint: consumer-application
+      - rate-limit:
+          action:
+            max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
+  user-management-endpoints-with-jwt:
+    apiEndpoints:
+      - modules
+      - sliders
+    policies:
+      - jwt:
+        - action:
+            secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+            checkCredentialExistence: false
+      - proxy:
+          - action:
+              serviceEndpoint: user-mangement
       - rate-limit:
           action:
             max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
