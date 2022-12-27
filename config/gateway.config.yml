@@ -2,25 +2,40 @@ http:
   port: 5000
 apiEndpoints:
   login:
-    paths: '/auth/login'
-    methods: ['POST']
+    paths: "/auth/login"
+    methods: ["POST"]
+  hr-login:
+    path: "/auth/hr-login"
+    methods: ["POST"]
   modules:
-    paths: '/modules/user'
-    methods: ['GET']
+    paths: "/modules/user"
+    methods: ["GET"]
   sliders:
-    paths: '/sliders'
-    methods: ['GET']
+    paths: "/sliders"
+    methods: ["GET"]
   images:
-    paths: '/public/*/:fileName'
-    methods: ['GET']
+    paths: "/public/*/:fileName"
+    methods: ["GET"]
   consumer-application-paths:
-    paths: '/consumer-app/*'
+    paths: "/consumer-app/*"
+  attendance-application-paths:
+    paths: "/attendance-app/*"
+  portal-api-paths:
+    paths: "/api/customerportal/*"
+  rider-api-paths:
+    paths: "/revamp_apis/*"
 serviceEndpoints:
   user-mangement:
-    url: 'http://localhost:5001'
+    url: "http://localhost:5001"
   consumer-application:
-    url: 'http://localhost:5002'
-  
+    url: "http://localhost:5002"
+  attendance-application:
+    url: "http://localhost:5003"
+  portal-api:
+    url: "http://orio.digital"
+  rider-api:
+    url: "http://orio.digital"
+
 policies:
   - basic-auth
   - cors
@@ -35,6 +50,7 @@ pipelines:
   user-management-endpoints:
     apiEndpoints:
       - login
+      - hr-login
       - images
     policies:
       - proxy:
@@ -45,12 +61,54 @@ pipelines:
       - consumer-application-paths
     policies:
       - jwt:
-        - action:
-            secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
-            checkCredentialExistence: false
+          - action:
+              secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+              checkCredentialExistence: false
       - proxy:
           - action:
               serviceEndpoint: consumer-application
+      - rate-limit:
+          action:
+            max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
+  rider-api-endpoints:
+    apiEndpoints:
+      - rider-api-paths
+    policies:
+      - jwt:
+          - action:
+              secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+              checkCredentialExistence: false
+      - proxy:
+          - action:
+              serviceEndpoint: portal-api
+      - rate-limit:
+          action:
+            max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
+  portal-api-endpoints:
+    apiEndpoints:
+      - portal-api-paths
+    policies:
+      - jwt:
+          - action:
+              secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+              checkCredentialExistence: false
+      - proxy:
+          - action:
+              serviceEndpoint: portal-api
+      - rate-limit:
+          action:
+            max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
+  attendance-application-endpoints:
+    apiEndpoints:
+      - attendance-application-paths
+    policies:
+      - jwt:
+          - action:
+              secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+              checkCredentialExistence: false
+      - proxy:
+          - action:
+              serviceEndpoint: attendance-application
       - rate-limit:
           action:
             max: 500 # limit to 500 req per default period windowMs=60000 (1 minute)
@@ -60,9 +118,9 @@ pipelines:
       - sliders
     policies:
       - jwt:
-        - action:
-            secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
-            checkCredentialExistence: false
+          - action:
+              secretOrPublicKey: 3GKsOqRULgOicqaAgzPWGO
+              checkCredentialExistence: false
       - proxy:
           - action:
               serviceEndpoint: user-mangement
